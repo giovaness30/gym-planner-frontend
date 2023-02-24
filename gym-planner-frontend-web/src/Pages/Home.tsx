@@ -42,7 +42,7 @@ function App() {
         />
       </div>
       <Divider></Divider>
-      <Row className="mb-3">
+      <Row className="mb-3 text-black">
         <Col className="gutter-row" span={8}>
           <Space>Maquina</Space>
         </Col>
@@ -55,7 +55,7 @@ function App() {
       </Row>
       {listTableMachine.map(machine => {
         return (
-          <Row key={machine.id}>
+          <Row className="text-black" key={machine.id}>
             <Col className="gutter-row" span={8}>
               <Space>{machine.name}</Space>
             </Col>

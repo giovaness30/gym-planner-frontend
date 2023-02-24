@@ -6,9 +6,10 @@ import {
   OrderedListOutlined,
   SmileOutlined
 } from '@ant-design/icons'
-import type { MenuProps } from 'antd'
+import { Button, MenuProps } from 'antd'
 import { Dropdown, Space } from 'antd'
 import RoutesUrlPath from '../assets/RoutesUrlPath'
+import { authLogout } from '../Services/AuthStoreServices'
 
 const MenuList = () => {
   const items: MenuProps['items'] = [
@@ -47,7 +48,11 @@ const MenuList = () => {
     {
       key: '4',
       danger: true,
-      label: 'Sair.'
+      label: (
+        <a rel="sair" onClick={() => authLogout()}>
+          Sair
+        </a>
+      )
     }
   ]
 
