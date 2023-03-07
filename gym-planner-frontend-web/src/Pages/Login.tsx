@@ -32,16 +32,16 @@ const Login = () => {
       <div className="m-auto w-3/4 flex-col">
         <Input
           placeholder="Email"
-          className="p-2 m-2"
-          style={{ width: 'calc(100% - 200px)' }}
+          className="p-2 m-2 md:w-3/4 sm:w-full"
+          // style={{ width: 'calc(100% - 50%)' }}
           defaultValue=""
           onChange={(e: any) => setEmail(e.target.value)}
         />
         <Input
           placeholder="Senha"
-          className="p-2 m-2"
+          className="p-2 m-2 md:w-3/4 sm:w-full"
           type="password"
-          style={{ width: 'calc(100% - 200px)' }}
+          // style={{ width: 'calc(100% - 200px)' }}
           defaultValue=""
           onChange={(e: any) => setPassword(e.target.value)}
         />
