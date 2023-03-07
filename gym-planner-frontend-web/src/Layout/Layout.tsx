@@ -4,7 +4,6 @@ import React, { useContext, useEffect, useState } from 'react'
 import '../App.css'
 import MenuList from '../Components/MenuList'
 import ContextProvider, { AppContext, authUser } from '../Contexts/Context'
-import { IsLogged } from '../Routes/AuthUtils'
 import RequireAuth from '../Routes/RequireAuth'
 import { authLogout } from '../Services/AuthStoreServices'
 
