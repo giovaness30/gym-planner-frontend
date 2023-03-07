@@ -19,7 +19,6 @@ function App() {
       setTrainings(item)
     })
   }, [])
-  // console.log(trainings)
 
   const handleSetTraining = (e: string) => {
     setInputTrainingValue(e)

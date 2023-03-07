@@ -10,3 +10,11 @@ export const authLogout = () => {
   auth.signOut()
   localStorage.removeItem('token')
 }
+
+export const getUidAuth = () => {
+
+  const token:any = localStorage.getItem('token')
+  return(JSON.parse(token).uid)
+  
+
+}

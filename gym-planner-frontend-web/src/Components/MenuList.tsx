@@ -16,7 +16,7 @@ const MenuList = () => {
     {
       key: '1',
       label: (
-        <a rel="home" href={'/'}>
+        <a rel="home" href={'/home'}>
           Inicio
         </a>
       ),

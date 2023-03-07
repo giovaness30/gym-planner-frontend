@@ -10,13 +10,14 @@ function RequireAuth({ children }) {
 
   React.useEffect(() => {
     onAuthStateChanged(auth, isUser => {
+      localStorage.setItem('token', JSON.stringify(isUser))
       if (!isUser && !IsRootRoute()) {
         navigate('/')
-        // location.reload()
+        location.reload()
         localStorage.removeItem('token')
       }
     })
-  })
+  }, [])
   return children
 }
 
