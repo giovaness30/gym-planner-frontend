@@ -1,5 +1,15 @@
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
-import { Button, Col, Collapse, Divider, Input, Modal, Row, Space } from 'antd'
+import {
+  Button,
+  Col,
+  Collapse,
+  Divider,
+  Input,
+  Modal,
+  Row,
+  Skeleton,
+  Space
+} from 'antd'
 import React, { Fragment, useEffect, useState } from 'react'
 import { Tooltip } from 'antd'
 
@@ -14,12 +24,13 @@ import {
 } from '../Services/TrainingsStoreServices'
 
 const TrainingsDetails = () => {
-  const [inputNewTrainingValue, setInputNewTrainingValue] = useState('')
+  const [inputNewTrainingValue, setInputNewTrainingValue]: any = useState(null)
   const [inputNewMachineTrainingValue, setInputNewMachineTrainingValue] =
     useState('')
   const [trainings, setTrainings]: any = useState([])
   const [editRepValue, setEditRepValue]: any = useState(null)
   const [editWeightValue, setEditWeightValue]: any = useState(null)
+  const [addMachineValue, setAddMachineValue]: any = useState(null)
 
   const [openModalEdit, setOpenModalEdit]: any = useState({
     id: '',
@@ -29,19 +40,30 @@ const TrainingsDetails = () => {
   const { Panel } = Collapse
 
   useEffect(() => {
-    // console.log(trainings)
-
     getInitial()
-    // handleListMachinesToTrainings()
   }, [])
 
   // useEffect(() => {
   //   console.log(trainings)
   // }, [trainings])
 
+  const LoadingSkeleton = ({ children }) => {
+    if (trainings.length == 0)
+      return (
+        <>
+          <div className="m-4">
+            <Skeleton active />
+            {/* //{' '} */}
+          </div>
+        </>
+      )
+    else {
+      return children
+    }
+  }
+
   const getInitial = () => {
     getTrainings().then((item: any) => {
-      // console.log(item)
       let trainings = item
       trainings.map((training, index) => {
         getMachineTraining(training.name).then(item => {
@@ -50,43 +72,81 @@ const TrainingsDetails = () => {
           setTrainings([...newValue])
         })
       })
-      // console.log(trainings)
     })
   }
 
+  // Add Training
   const handleCreateTraining = () => {
     if (!inputNewTrainingValue) return
-    setInputNewTrainingValue(' ')
-    createTraining(inputNewTrainingValue)
-    getInitial()
-  }
-  const handleCreateMachineTraining = trainingName => {
-    if (!inputNewMachineTrainingValue) return
-    setInputNewMachineTrainingValue(' ')
-    createMachineTraining(inputNewMachineTrainingValue, trainingName)
-    getInitial()
+    createTraining(inputNewTrainingValue).then(resp => {
+      if (resp)
+        setTrainings(current => {
+          current.push(resp)
+          return [...current]
+        })
+    })
+    setInputNewTrainingValue(null)
   }
 
-  const handleDeleteTraining = (id: string) => {
+  // Add Machine
+  const handleCreateMachineTraining = (
+    trainingName: string,
+    indexTraining: string
+  ) => {
+    if (!addMachineValue) return
+    setAddMachineValue(null)
+    createMachineTraining(addMachineValue, trainingName).then(resp => {
+      if (resp)
+        setTrainings(current => {
+          current[indexTraining].machines.push(resp)
+          return [...current]
+        })
+    })
+  }
+
+  // Delete Trainig
+  const handleDeleteTraining = (id: string, indexTraining: string) => {
     deleteTraining(id)
-    getInitial()
-  }
-  const handleDeleteMachine = (id: string, index: any) => {
-    // deleteMachineTraining(id)
-    // getInitial()
-    console.log(trainings[index].machines)
-    console.log(index)
-
-    // setTrainings(current)
+    setTrainings(current => {
+      const itemDelete = current[indexTraining]
+      return [...current.filter(x => x !== itemDelete)]
+    })
   }
 
+  // Delete Machine
+  const handleDeleteMachine = (
+    id: string,
+    indexMachines: string,
+    indexTrainings: string
+  ) => {
+    deleteMachineTraining(id)
+
+    setTrainings(current => {
+      const itemDelete = current[indexTrainings].machines[indexMachines]
+
+      current[indexTrainings].machines = current[
+        indexTrainings
+      ].machines.filter(x => x !== itemDelete)
+      return [...current]
+    })
+  }
+
+  // Set Values to Open Modal
   const handleEditValues = (rep: number, weight: number) => {
     setEditRepValue(rep)
     setEditWeightValue(weight)
   }
 
-  const updateValuesMachine = (id: string) => {
+  // Update Values Machine
+  const updateValuesMachine = (id: string, index: any) => {
     updateMachine(id, editRepValue, editWeightValue)
+    setTrainings(current => {
+      current[index.indexTraining].machines[index.indexMachines].repet =
+        editRepValue
+      current[index.indexTraining].machines[index.indexMachines].weight =
+        editWeightValue
+      return [...current]
+    })
   }
 
   return (
@@ -96,6 +156,7 @@ const TrainingsDetails = () => {
         <Input
           style={{ width: 'calc(100% - 200px)' }}
           defaultValue=""
+          value={inputNewTrainingValue}
           onChange={(e: any) => setInputNewTrainingValue(e.target.value)}
         />
         <Button
@@ -107,100 +168,116 @@ const TrainingsDetails = () => {
         </Button>
       </Input.Group>
       <Divider></Divider>
-      {trainings.length > 0 && (
-        <Collapse className="mx-4 m-auto" defaultActiveKey={trainings[0].id}>
-          {trainings.map((training: any) => {
-            // console.log(training.machines)
+      <LoadingSkeleton>
+        {trainings?.length > 0 && (
+          <Collapse className="mx-4 m-auto" defaultActiveKey={trainings[0].id}>
+            {trainings.map((training: any, indexTraining: string) => {
+              // console.log(training.machines)
 
-            return (
-              <Panel
-                header={training.name}
-                key={training.id}
-                // className="flex flex-col"
-              >
-                <Row className="py-1 flex-row flex justify-center border-b-2">
-                  <Col span={8}>Maquina</Col>
-                  <Col span={4}>Repetições</Col>
-                  <Col span={4}>Carga</Col>
-                  <Col className="" span={1}></Col>
-                  <Col span={1}></Col>
-                </Row>
-                {training.machines &&
-                  training.machines.map((machine: any, i: any) => {
-                    console.log(machine)
-
-                    return (
-                      // <div className="">
-                      <Fragment>
-                        <Row
-                          className="py-1 flex-row flex justify-center"
-                          // key={index}
-                        >
-                          <Col span={8}>{machine.name}</Col>
-                          <Col span={4}>{machine.repet}</Col>
-                          <Col span={4}>{machine.weight}kg</Col>
-                          <Col span={1}>
-                            <Tooltip title="Editar Maquina">
-                              <EditOutlined
-                                onClick={() => {
-                                  handleEditValues(
-                                    machine.repet,
-                                    machine.weight
-                                  )
-                                  setOpenModalEdit({
-                                    id: machine.id,
-                                    title: machine.name,
-                                    status: true
-                                  })
-                                }}
-                              />
-                            </Tooltip>
-                          </Col>
-                          <Col className="" span={1}>
-                            <Tooltip title="Excluir Maquina">
-                              <DeleteOutlined
-                                onClick={() =>
-                                  handleDeleteMachine(machine.id, i)
-                                }
-                              />
-                            </Tooltip>
-                          </Col>
-                        </Row>
-                      </Fragment>
-                    )
-                  })}
-                {/* </Space> */}
-                <Space className="flex mt-5">
-                  <Input.Group compact>
-                    <Input
-                      style={{ width: 'calc(100% - 200px)' }}
-                      defaultValue=""
-                      onChange={(e: any) =>
-                        setInputNewMachineTrainingValue(e.target.value)
+              return (
+                <Panel
+                  header={training.name}
+                  key={training.id}
+                  // className="flex flex-col"
+                >
+                  <Row className="py-1 flex-row flex justify-center border-b-2">
+                    <Col span={8}>Maquina</Col>
+                    <Col span={6}>Repetições</Col>
+                    <Col span={6}>Carga</Col>
+                    <Col className="" span={1}></Col>
+                    <Col span={1}></Col>
+                  </Row>
+                  {training.machines &&
+                    training.machines.map(
+                      (machine: any, indexMachines: string) => {
+                        return (
+                          // <div className="">
+                          <Fragment>
+                            <Row
+                              className="py-1 flex-row flex justify-center"
+                              // key={index}
+                            >
+                              <Col span={8}>{machine.name}</Col>
+                              <Col span={6}>{machine.repet}</Col>
+                              <Col span={6}>{machine.weight}kg</Col>
+                              <Col span={1}>
+                                <Tooltip title="Editar Maquina">
+                                  <EditOutlined
+                                    onClick={() => {
+                                      handleEditValues(
+                                        machine.repet,
+                                        machine.weight
+                                      )
+                                      setOpenModalEdit({
+                                        id: machine.id,
+                                        title: machine.name,
+                                        status: true,
+                                        index: { indexTraining, indexMachines }
+                                      })
+                                    }}
+                                  />
+                                </Tooltip>
+                              </Col>
+                              <Col className="ml-2" span={1}>
+                                <Tooltip title="Excluir Maquina">
+                                  <DeleteOutlined
+                                    onClick={() =>
+                                      handleDeleteMachine(
+                                        machine.id,
+                                        indexMachines,
+                                        indexTraining
+                                      )
+                                    }
+                                  />
+                                </Tooltip>
+                              </Col>
+                            </Row>
+                          </Fragment>
+                        )
                       }
-                    />
+                    )}
+                  {/* </Space> */}
+                  <Space className="flex flex-col md:flex-row mt-5 m-auto">
+                    <Input.Group compact>
+                      <Input
+                        style={{ width: 'calc(100% - 50%)' }}
+                        // className="w-1/4"
+                        defaultValue=""
+                        value={addMachineValue}
+                        onChange={e => setAddMachineValue(e.target.value)}
+                      />
+                      <Button
+                        className="bg-green-600 w-2/4"
+                        onClick={() =>
+                          handleCreateMachineTraining(
+                            training.name,
+                            indexTraining
+                          )
+                        }
+                        type="primary"
+                      >
+                        Add Nova Maquina
+                      </Button>
+                    </Input.Group>
                     <Button
-                      className="bg-green-600"
-                      onClick={() => handleCreateMachineTraining(training.name)}
-                      type="primary"
+                      onClick={() =>
+                        handleDeleteTraining(training.id, indexTraining)
+                      }
                     >
-                      Add Nova Maquina
+                      Excluir Treino
                     </Button>
-                  </Input.Group>
-                  <Button onClick={() => handleDeleteTraining(training.id)}>
-                    Excluir Treino
-                  </Button>
-                </Space>
-              </Panel>
-            )
-          })}
-        </Collapse>
-      )}
+                  </Space>
+                </Panel>
+              )
+            })}
+          </Collapse>
+        )}
+      </LoadingSkeleton>
       <Modal
         title={openModalEdit.title}
         open={openModalEdit.status}
         onOk={() => {
-          updateValuesMachine(openModalEdit.id)
+          updateValuesMachine(openModalEdit.id, openModalEdit.index)
           setOpenModalEdit({ id: '', title: '', status: false })
         }}
         onCancel={() => setOpenModalEdit({ title: '', status: false })}

@@ -15,7 +15,7 @@ const layout = (props: any) => {
       <div className="page">
         <div
           id="conteiner"
-          className="bg-white rounded-xl shadow-lg w-2/3 m-auto mt-10 pb-10"
+          className="bg-white rounded-xl shadow-lg w-11/12 md:w-2/4 m-auto mt-10 pb-10"
         >
           {auth?.currentUser && (
             <div className="flex justify-start pt-5 ml-2">

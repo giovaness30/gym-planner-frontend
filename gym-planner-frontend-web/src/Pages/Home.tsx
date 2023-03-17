@@ -29,10 +29,11 @@ function App() {
 
   return (
     <Fragment>
-      <div className="max-w-xlm-auto my-5">
+      <div className="w-11/12 md:w-3/4 m-auto my-5">
         <Select
           defaultValue="Selecione o Treino de Hoje.."
-          style={{ width: '50%' }}
+          // style={{ width: '50%' }}
+          className="w-11/12 md:w-full"
           onChange={e => handleSetTraining(e)}
           options={trainings.map((training: any) => ({
             label: training.name,

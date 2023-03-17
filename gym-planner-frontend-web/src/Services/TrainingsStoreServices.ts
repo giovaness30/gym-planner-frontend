@@ -29,13 +29,32 @@ export const getMachineTraining = async (training:string) => {
 
 export const createTraining = async (name: string) => {
   let auth:any = getUidAuth()
+  const docTraining = {name, uid:auth}
 
-  await addDoc(userCollectionRef('trainings'), {name, uid:auth})
+  return await addDoc(userCollectionRef('trainings'), docTraining)
+  .then(resp => {
+    if(resp.id)
+    return Object.assign(docTraining, {id: resp.id, machines:[]})
+  })
+  .catch(error=> console.log(`Verificar backend! :${error}`))
+
 }
+
 export const createMachineTraining = async (name: string, training:string) => {
   let auth:any = getUidAuth()
 
-  await addDoc(userCollectionRef('machine'), {name, uid:auth, training, repet:10, weight:8})
+  let objDoc = {name, uid:auth, training, repet:10, weight:8}
+
+  return await addDoc(userCollectionRef('machine'), objDoc )
+  .then((resp)=>{
+    if(resp.id)
+    return Object.assign(objDoc, {id:resp.id}) 
+  }).catch((error)=>{
+    console.log(`Verificar backend! : ${error}`)
+    
+  })
+
+  
 }
 
 export const deleteTraining = async (id:string) => {
@@ -51,5 +70,6 @@ export const deleteMachineTraining = async (id:string) => {
 
 export const updateMachine = async (id:string, repet:number, weight:number) => {
   const machineRef:any = doc(db, 'machine', id);
-  await updateDoc(machineRef, { repet: repet, weight: weight });
+  await updateDoc(machineRef, { repet: repet, weight: weight })
+  
 }
