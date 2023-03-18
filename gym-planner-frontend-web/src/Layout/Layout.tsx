@@ -23,9 +23,7 @@ const layout = (props: any) => {
             </div>
           )}
           <div className=" py-5">
-            <div className="text-xl font-medium text-black w-auto">
-              Gym Planner
-            </div>
+            <div className=" font-medium text-black w-auto">Gym Planner</div>
           </div>
           {props.children}
         </div>

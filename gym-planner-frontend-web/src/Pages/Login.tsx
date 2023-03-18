@@ -1,4 +1,4 @@
-import { Button, Input } from 'antd'
+import { Button, Form, Input } from 'antd'
 import { Fragment, useState } from 'react'
 
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
@@ -23,36 +23,56 @@ const Login = () => {
       .catch(error => {
         const errorCode = error.code
         const errorMessage = error.message
-        console.log(errorMessage)
+        alert(errorMessage)
       })
+  }
+
+  const onFinish = values => {
+    handleLogin(values.email, values.password)
   }
 
   return (
     <Fragment>
       <div className="m-auto w-3/4 flex-col">
-        <Input
-          placeholder="Email"
-          className="p-2 m-2 md:w-3/4 sm:w-full"
-          // style={{ width: 'calc(100% - 50%)' }}
-          defaultValue=""
-          onChange={(e: any) => setEmail(e.target.value)}
-        />
-        <Input
-          placeholder="Senha"
-          className="p-2 m-2 md:w-3/4 sm:w-full"
-          type="password"
-          // style={{ width: 'calc(100% - 200px)' }}
-          defaultValue=""
-          onChange={(e: any) => setPassword(e.target.value)}
-        />
+        <Form
+          name="basic"
+          style={{ maxWidth: 600 }}
+          onFinish={onFinish}
+          labelCol={{ span: 6 }}
+          wrapperCol={{ span: 16 }}
+          size={'large'}
+        >
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[{ required: true, message: 'Informar Email' }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            label="Senha"
+            name="password"
+            rules={[{ required: true, message: 'Informar a senha' }]}
+          >
+            <Input.Password
+              className="p-2 m-2 md:w-3/4 sm:w-full"
+              style={{ width: '98%' }}
+            />
+          </Form.Item>
+
+          <Form.Item>
+            <Button
+              className="bg-green-600 mt-3"
+              id="btnSignIn"
+              type="primary"
+              htmlType="submit"
+            >
+              Entrar
+            </Button>
+          </Form.Item>
+        </Form>
       </div>
-      <Button
-        className="bg-green-600 mt-3"
-        onClick={() => handleLogin(email, password)}
-        type="primary"
-      >
-        Entrar
-      </Button>
     </Fragment>
   )
 }

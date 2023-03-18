@@ -6,12 +6,13 @@
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  /* font-size: 20pt!important; */
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
 
-  font-synthesis: none;
+  /* font-synthesis: none; */
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -34,6 +35,11 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  /* font-size: 20pt!important; */
+}
+
+body * {
+  font-size: 14pt!important;
 }
 
 h1 {
@@ -45,12 +51,13 @@ button {
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
-  font-size: 1em;
+  /* font-size: 1em!important; */
   font-weight: 500;
   font-family: inherit;
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
+  /* font-size: 14pt!important; */
 }
 
 button:hover {
@@ -75,4 +82,17 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+/* Change the white to any color */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active{
+    -webkit-box-shadow: 0 0 0 30px rgb(255, 255, 255) inset !important;
+    color: black;
+}
+/*Change text in autofill textbox*/
+input:-webkit-autofill{
+  -webkit-text-fill-color: rgb(7, 7, 7) !important;
 }

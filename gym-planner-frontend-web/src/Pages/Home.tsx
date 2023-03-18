@@ -7,7 +7,7 @@ import {
 
 import { EditOutlined } from '@ant-design/icons'
 
-import { Col, Divider, Row, Select, Space } from 'antd'
+import { Col, Divider, Row, Select, Space, Typography } from 'antd'
 
 function App() {
   const [trainings, setTrainings]: any = useState([])
@@ -57,7 +57,9 @@ function App() {
         return (
           <Row className="text-black" key={machine.id}>
             <Col className="gutter-row" span={8}>
-              <Space>{machine.name}</Space>
+              <Space>
+                <Typography className="text-[14pt]">{machine.name}</Typography>
+              </Space>
             </Col>
             <Col className="gutter-row" span={8}>
               <Space>{machine.repet}x</Space>
