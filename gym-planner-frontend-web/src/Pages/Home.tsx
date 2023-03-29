@@ -42,29 +42,35 @@ function App() {
         />
       </div>
       <Divider></Divider>
-      <Row className="mb-3 text-black">
+      <Row className=" py-1 mb-3 flex justify-center w-full text-black border-b-2">
         <Col className="gutter-row" span={8}>
-          <Space>Maquina</Space>
+          <Space>Exercicio</Space>
         </Col>
-        <Col className="gutter-row" span={8}>
-          <Space>Rep.</Space>
+        <Col className="gutter-row" span={4}>
+          <Space>Séries</Space>
         </Col>
-        <Col className="gutter-row" span={8}>
-          <Space>Peso Atual</Space>
+        <Col className="gutter-row" span={4}>
+          <Space>Repetições</Space>
+        </Col>
+        <Col className="gutter-row" span={4}>
+          <Space>Carga</Space>
         </Col>
       </Row>
       {listTableMachine.map(machine => {
         return (
-          <Row className="text-black" key={machine.id}>
+          <Row className="text-black justify-center" key={machine.id}>
             <Col className="gutter-row" span={8}>
               <Space>
                 <Typography className="text-[14pt]">{machine.name}</Typography>
               </Space>
             </Col>
-            <Col className="gutter-row" span={8}>
+            <Col className="gutter-row" span={4}>
+              <Space>{machine.serie}x</Space>
+            </Col>
+            <Col className="gutter-row" span={4}>
               <Space>{machine.repet}x</Space>
             </Col>
-            <Col className="gutter-row" span={8}>
+            <Col className="gutter-row" span={4}>
               <Space>{machine.weight}.kg</Space>
               <EditOutlined />
             </Col>

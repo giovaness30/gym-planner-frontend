@@ -43,7 +43,7 @@ export const createTraining = async (name: string) => {
 export const createMachineTraining = async (name: string, training:string) => {
   let auth:any = getUidAuth()
 
-  let objDoc = {name, uid:auth, training, repet:10, weight:8}
+  let objDoc = {name, uid:auth, training, serie:4, repet:10, weight:8}
 
   return await addDoc(userCollectionRef('machine'), objDoc )
   .then((resp)=>{
@@ -68,8 +68,8 @@ export const deleteMachineTraining = async (id:string) => {
   
 }
 
-export const updateMachine = async (id:string, repet:number, weight:number) => {
+export const updateMachine = async (id:string, serie:number, repet:number, weight:number) => {
   const machineRef:any = doc(db, 'machine', id);
-  await updateDoc(machineRef, { repet: repet, weight: weight })
+  await updateDoc(machineRef, { serie, repet: repet, weight: weight })
   
 }
