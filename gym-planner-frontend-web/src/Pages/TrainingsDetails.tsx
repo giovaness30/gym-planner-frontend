@@ -238,12 +238,24 @@ const TrainingsDetails = () => {
       <Divider></Divider>
       <LoadingSkeleton>
         {trainings?.length > 0 && (
-          <Collapse className="mx-4 m-auto" defaultActiveKey={trainings[0].id}>
+          <Collapse className="mx-2 m-auto" defaultActiveKey={trainings[0].id}>
             {trainings?.map((training: any, indexTraining: string) => {
               // console.log(training.machines)
 
               return (
-                <Panel header={training.name} key={training.id}>
+                <Panel
+                  header={training.name}
+                  key={training.id}
+                  extra={
+                    <Tooltip title="Excluir Treino">
+                      <DeleteOutlined
+                        onClick={() =>
+                          handleDeleteTraining(training.id, indexTraining)
+                        }
+                      />
+                    </Tooltip>
+                  }
+                >
                   <DragDropContext onDragEnd={onDragEnd}>
                     <Droppable droppableId="id" type="PERSON">
                       {(provided, snapshot) => {
@@ -257,15 +269,15 @@ const TrainingsDetails = () => {
                             // )}
                             style={{ color: ' #000' }}
                           >
-                            <Row className="py-1 justify-center w-full border-b-2">
-                              <Col span={1}></Col>
+                            <Row className="py-1 justify-center w-full border bg-slate-100 rounded-t">
+                              {/* <Col span={1}></Col> */}
                               <Col span={11}>Exercicio</Col>
-                              <Col span={3}>Series</Col>
-                              <Col span={3}>Repetições</Col>
-                              <Col span={3}>Carga</Col>
+                              <Col span={3}>Ser.</Col>
+                              <Col span={5}>Rep.</Col>
+                              <Col span={4}>Carga</Col>
                               <Col className="" span={1}></Col>
-                              <Col span={1}></Col>
-                              <Col span={1}></Col>
+                              {/* <Col span={1}></Col>
+                              <Col span={1}></Col> */}
                             </Row>
                             {training?.machines?.map(
                               (machine, indexMachines) => {
@@ -291,59 +303,35 @@ const TrainingsDetails = () => {
                                           {...provided.dragHandleProps}
                                         >
                                           <Row
-                                            className="py-1 flex-row flex justify-center"
+                                            className="py-1 my-1 flex-row flex justify-center border rounded bg-white shadow-sm"
                                             // key={index}
+                                            onClick={() => {
+                                              handleEditValues(
+                                                machine.serie,
+                                                machine.repet,
+                                                machine.weight
+                                              )
+                                              setOpenModalEdit({
+                                                id: machine.id,
+                                                title: machine.name,
+                                                status: true,
+                                                index: {
+                                                  indexTraining,
+                                                  indexMachines
+                                                }
+                                              })
+                                            }}
                                           >
-                                            <Col span={1}>
-                                              {machine.key}
-                                              {/* <Tooltip title="Mudar Ordem">
-                                                <MenuOutlined
-                                                  style={{ color: '#cacaca' }}
-                                                />
-                                              </Tooltip> */}
-                                            </Col>
                                             <Col span={11}>{machine.name}</Col>
                                             <Col span={3}>{machine.serie}</Col>
-                                            <Col span={3}>{machine.repet}</Col>
-                                            <Col span={3}>
+                                            <Col span={5}>{machine.repet}</Col>
+                                            <Col span={4}>
                                               {machine.weight}kg
                                             </Col>
-                                            <Col span={1}></Col>
                                             <Col span={1}>
-                                              <Tooltip title="Editar Maquina">
-                                                <EditOutlined
-                                                  onClick={() => {
-                                                    handleEditValues(
-                                                      machine.serie,
-                                                      machine.repet,
-                                                      machine.weight
-                                                    )
-                                                    setOpenModalEdit({
-                                                      id: machine.id,
-                                                      title: machine.name,
-                                                      status: true,
-                                                      index: {
-                                                        indexTraining,
-                                                        indexMachines
-                                                      }
-                                                    })
-                                                  }}
-                                                />
-                                              </Tooltip>
-                                            </Col>
-
-                                            <Col className="" span={1}>
-                                              <Tooltip title="Excluir Maquina">
-                                                <DeleteOutlined
-                                                  onClick={() =>
-                                                    handleDeleteMachine(
-                                                      machine.id,
-                                                      indexMachines,
-                                                      indexTraining
-                                                    )
-                                                  }
-                                                />
-                                              </Tooltip>
+                                              {/* <Tooltip title="Editar Maquina">
+                                                <EditOutlined />
+                                              </Tooltip> */}
                                             </Col>
                                           </Row>
                                         </div>
@@ -374,14 +362,6 @@ const TrainingsDetails = () => {
                     >
                       Adicionar novo Exercicio
                     </Button>
-                    <Button
-                      className="mt-5"
-                      onClick={() =>
-                        handleDeleteTraining(training.id, indexTraining)
-                      }
-                    >
-                      Excluir Treino
-                    </Button>
                   </Space>
                 </Panel>
               )
@@ -395,10 +375,7 @@ const TrainingsDetails = () => {
         open={openModalEdit.status}
         okText="Salvar"
         okType="default"
-        onOk={() => {
-          updateValuesMachine(openModalEdit.id, openModalEdit.index)
-          setOpenModalEdit({ id: '', title: '', status: false })
-        }}
+        footer={null}
         onCancel={() => setOpenModalEdit({ title: '', status: false })}
       >
         <Space className="flex justify-center">
@@ -436,6 +413,41 @@ const TrainingsDetails = () => {
             </Col>
           </Row>
         </Space>
+        <div className="w-full flex mt-10">
+          <div className="w-1/3 flex justify-start">
+            <Tooltip title="Excluir Maquina">
+              <Button
+                type="text"
+                danger
+                onClick={() => {
+                  handleDeleteMachine(
+                    openModalEdit.id,
+                    openModalEdit.index.indexMachines,
+                    openModalEdit.index.indexTraining
+                  )
+                  setOpenModalEdit({ title: '', status: false })
+                }}
+              >
+                Excluir
+              </Button>
+            </Tooltip>
+          </div>
+          <div className="w-2/3 flex justify-evenly">
+            <Button
+              onClick={() => setOpenModalEdit({ title: '', status: false })}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                updateValuesMachine(openModalEdit.id, openModalEdit.index)
+                setOpenModalEdit({ id: '', title: '', status: false })
+              }}
+            >
+              Salvar
+            </Button>
+          </div>
+        </div>
       </Modal>
 
       <Modal
