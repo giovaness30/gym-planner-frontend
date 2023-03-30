@@ -239,7 +239,7 @@ const TrainingsDetails = () => {
       <LoadingSkeleton>
         {trainings?.length > 0 && (
           <Collapse className="mx-4 m-auto" defaultActiveKey={trainings[0].id}>
-            {trainings.map((training: any, indexTraining: string) => {
+            {trainings?.map((training: any, indexTraining: string) => {
               // console.log(training.machines)
 
               return (
@@ -267,7 +267,7 @@ const TrainingsDetails = () => {
                               <Col span={1}></Col>
                               <Col span={1}></Col>
                             </Row>
-                            {training.machines?.map(
+                            {training?.machines?.map(
                               (machine, indexMachines) => {
                                 // console.log(machine)
 
