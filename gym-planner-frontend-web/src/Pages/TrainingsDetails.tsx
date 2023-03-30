@@ -1,4 +1,4 @@
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import { EditOutlined, DeleteOutlined, MenuOutlined } from '@ant-design/icons'
 import {
   Button,
   Col,
@@ -10,7 +10,13 @@ import {
   Skeleton,
   Space
 } from 'antd'
-import React, { Fragment, useCallback, useEffect, useState } from 'react'
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useReducer,
+  useState
+} from 'react'
 import { Tooltip } from 'antd'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 
@@ -70,9 +76,13 @@ const TrainingsDetails = () => {
       let trainings = item
       trainings.map((training, index) => {
         getMachineTraining(training.name).then(item => {
-          trainings[index].machines = item
+          let orderListItems = item.sort(function (a, b) {
+            return a.key - b.key
+          })
+
+          trainings[index].machines = orderListItems
           const newValue = trainings
-          console.log(newValue)
+          // console.log(newValue)
 
           setTrainings([...newValue])
         })
@@ -97,7 +107,8 @@ const TrainingsDetails = () => {
   const handleCreateMachineTraining = (
     name: string,
     trainingName: string,
-    indexTraining: string
+    indexTraining: string,
+    key: number
   ) => {
     if (!trainingName) return
     setExerciseModal({
@@ -106,10 +117,13 @@ const TrainingsDetails = () => {
       trainingName: '',
       indexTraining: ''
     })
-    createMachineTraining(name, trainingName).then(resp => {
+    createMachineTraining(name, trainingName, key).then(resp => {
       if (resp)
         setTrainings(current => {
           current[indexTraining].machines.push(resp)
+          current[indexTraining].machines.sort(function (a, b) {
+            return a.key - b.key
+          })
           return [...current]
         })
     })
@@ -164,7 +178,44 @@ const TrainingsDetails = () => {
   }
 
   //beautiful drag and drop
-  const onDragEnd = useCallback(result => {}, [])
+  const onDragEnd = useCallback(result => {
+    console.log(result)
+
+    const { destination, source, draggableId } = result
+
+    if (!destination) {
+      return
+    }
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return
+    }
+
+    setTrainings(current => {
+      const newList = Array.from(current[0].machines)
+      const moveItem = current[0].machines[source.index]
+      newList.splice(source.index, 1)
+      newList.splice(destination.index, 0, moveItem)
+      console.log(current)
+
+      current[0].machines = newList.map((item: any, index) => {
+        updateMachine(item.id, item.serie, item.repet, item.weight, index)
+        return {
+          uid: item.uid,
+          id: item.id,
+          key: index,
+          name: item.name,
+          serie: item.serie,
+          repet: item.repet,
+          weight: item.weight,
+          training: item.training
+        }
+      })
+      return [...current]
+    })
+  }, [])
 
   return (
     <Fragment>
@@ -192,68 +243,122 @@ const TrainingsDetails = () => {
               // console.log(training.machines)
 
               return (
-                <Panel
-                  header={training.name}
-                  key={training.id}
-                  // className="flex flex-col"
-                >
-                  <Row className="py-1 flex-row flex justify-center w-full border-b-2">
-                    <Col span={9}>Exercicio</Col>
-                    <Col span={4}>Series</Col>
-                    <Col span={4}>Repetições</Col>
-                    <Col span={4}>Carga</Col>
-                    <Col className="" span={1}></Col>
-                    <Col span={1}></Col>
-                    <Col span={1}></Col>
-                  </Row>
-                  {training.machines.map(
-                    (machine: any, indexMachines: string) => (
-                      <Row
-                        className="py-1 flex-row flex justify-center"
-                        // key={index}
-                      >
-                        <Col span={9}>{machine.name}</Col>
-                        <Col span={4}>{machine.serie}</Col>
-                        <Col span={4}>{machine.repet}</Col>
-                        <Col span={4}>{machine.weight}kg</Col>
-                        <Col span={1}>
-                          <Tooltip title="Editar Maquina">
-                            <EditOutlined
-                              onClick={() => {
-                                handleEditValues(
-                                  machine.serie,
-                                  machine.repet,
-                                  machine.weight
-                                )
-                                setOpenModalEdit({
-                                  id: machine.id,
-                                  title: machine.name,
-                                  status: true,
-                                  index: {
-                                    indexTraining,
-                                    indexMachines
-                                  }
-                                })
-                              }}
-                            />
-                          </Tooltip>
-                        </Col>
-                        <Col className="ml-2" span={1}>
-                          <Tooltip title="Excluir Maquina">
-                            <DeleteOutlined
-                              onClick={() =>
-                                handleDeleteMachine(
-                                  machine.id,
-                                  indexMachines,
-                                  indexTraining
+                <Panel header={training.name} key={training.id}>
+                  <DragDropContext onDragEnd={onDragEnd}>
+                    <Droppable droppableId="id" type="PERSON">
+                      {(provided, snapshot) => {
+                        return (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            // className={cx(
+                            //   styles.dropper,
+                            //   snapshot.isDraggingOver && styles.dropOver
+                            // )}
+                            style={{ color: ' #000' }}
+                          >
+                            <Row className="py-1 justify-center w-full border-b-2">
+                              <Col span={1}></Col>
+                              <Col span={11}>Exercicio</Col>
+                              <Col span={3}>Series</Col>
+                              <Col span={3}>Repetições</Col>
+                              <Col span={3}>Carga</Col>
+                              <Col className="" span={1}></Col>
+                              <Col span={1}></Col>
+                              <Col span={1}></Col>
+                            </Row>
+                            {training.machines?.map(
+                              (machine, indexMachines) => {
+                                // console.log(machine)
+
+                                return (
+                                  <Draggable
+                                    key={machine.key}
+                                    draggableId={machine.id}
+                                    index={indexMachines}
+                                  >
+                                    {(provided, snapshot) => {
+                                      return (
+                                        <div
+                                          // className={cx(
+                                          //   styles.dragger,
+                                          //   snapshot.isDragging && styles.dragging
+                                          // )}
+                                          // className={snapshot.isDragging}
+                                          style={{ color: '#000' }}
+                                          ref={provided.innerRef}
+                                          {...provided.draggableProps}
+                                          {...provided.dragHandleProps}
+                                        >
+                                          <Row
+                                            className="py-1 flex-row flex justify-center"
+                                            // key={index}
+                                          >
+                                            <Col span={1}>
+                                              {machine.key}
+                                              {/* <Tooltip title="Mudar Ordem">
+                                                <MenuOutlined
+                                                  style={{ color: '#cacaca' }}
+                                                />
+                                              </Tooltip> */}
+                                            </Col>
+                                            <Col span={11}>{machine.name}</Col>
+                                            <Col span={3}>{machine.serie}</Col>
+                                            <Col span={3}>{machine.repet}</Col>
+                                            <Col span={3}>
+                                              {machine.weight}kg
+                                            </Col>
+                                            <Col span={1}></Col>
+                                            <Col span={1}>
+                                              <Tooltip title="Editar Maquina">
+                                                <EditOutlined
+                                                  onClick={() => {
+                                                    handleEditValues(
+                                                      machine.serie,
+                                                      machine.repet,
+                                                      machine.weight
+                                                    )
+                                                    setOpenModalEdit({
+                                                      id: machine.id,
+                                                      title: machine.name,
+                                                      status: true,
+                                                      index: {
+                                                        indexTraining,
+                                                        indexMachines
+                                                      }
+                                                    })
+                                                  }}
+                                                />
+                                              </Tooltip>
+                                            </Col>
+
+                                            <Col className="" span={1}>
+                                              <Tooltip title="Excluir Maquina">
+                                                <DeleteOutlined
+                                                  onClick={() =>
+                                                    handleDeleteMachine(
+                                                      machine.id,
+                                                      indexMachines,
+                                                      indexTraining
+                                                    )
+                                                  }
+                                                />
+                                              </Tooltip>
+                                            </Col>
+                                          </Row>
+                                        </div>
+                                      )
+                                    }}
+                                  </Draggable>
                                 )
                               }
-                            />
-                          </Tooltip>
-                        </Col>
-                      </Row>
-                    )
-                  )}
+                            )}
+                            {provided.placeholder}
+                          </div>
+                        )
+                      }}
+                    </Droppable>
+                  </DragDropContext>
                   <Space className="flex flex-col mt-5 m-auto">
                     <Button
                       className="mt-5"
@@ -284,6 +389,7 @@ const TrainingsDetails = () => {
           </Collapse>
         )}
       </LoadingSkeleton>
+
       <Modal
         title={openModalEdit.title}
         open={openModalEdit.status}
@@ -336,10 +442,17 @@ const TrainingsDetails = () => {
         title="Novo Exercicio"
         open={exerciseModal.open}
         onOk={() =>
+          // console.log(
+          //   trainings.find(x => x.name == exerciseModal.trainingName).machines
+          //     .length
+          // )
+
           handleCreateMachineTraining(
             exerciseModal.name,
             exerciseModal.trainingName,
-            exerciseModal.indexTraining
+            exerciseModal.indexTraining,
+            trainings.find(x => x.name == exerciseModal.trainingName).machines
+              .length
           )
         }
         okText="Adicionar"
