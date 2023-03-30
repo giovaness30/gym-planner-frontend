@@ -12,6 +12,8 @@ export const getTrainings = async () => {
 
   let data:any = await getDocs(userCollectionRef('trainings'))
   data = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+  console.log(data);
+  
   return(data.filter((x)=> x.uid == auth))
 }
 
@@ -40,10 +42,10 @@ export const createTraining = async (name: string) => {
 
 }
 
-export const createMachineTraining = async (name: string, training:string) => {
+export const createMachineTraining = async (name: string, training:string, key:number) => {
   let auth:any = getUidAuth()
 
-  let objDoc = {name, uid:auth, training, serie:4, repet:10, weight:8}
+  let objDoc = {name, uid:auth, training, serie:4, repet:10, weight:8, key}
 
   return await addDoc(userCollectionRef('machine'), objDoc )
   .then((resp)=>{
@@ -68,8 +70,8 @@ export const deleteMachineTraining = async (id:string) => {
   
 }
 
-export const updateMachine = async (id:string, serie:number, repet:number, weight:number) => {
+export const updateMachine = async (id:string, serie:number, repet:number, weight:number, key:void) => {
   const machineRef:any = doc(db, 'machine', id);
-  await updateDoc(machineRef, { serie, repet: repet, weight: weight })
+  await updateDoc(machineRef, { serie, repet: repet, weight: weight, key })
   
 }

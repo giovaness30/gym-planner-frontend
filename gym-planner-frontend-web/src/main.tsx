@@ -7,13 +7,13 @@ import { BrowserRouter } from 'react-router-dom'
 import ContextProvider from './Contexts/Context'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
-    <ContextProvider>
-      <BrowserRouter>
-        <Layout>
-          <AppRouter />
-        </Layout>
-      </BrowserRouter>
-    </ContextProvider>
-  </React.StrictMode>
+  // <React.StrictMode>
+  <ContextProvider>
+    <BrowserRouter>
+      <Layout>
+        <AppRouter />
+      </Layout>
+    </BrowserRouter>
+  </ContextProvider>
+  // </React.StrictMode>
 )
