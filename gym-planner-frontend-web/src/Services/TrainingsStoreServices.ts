@@ -70,7 +70,7 @@ export const deleteMachineTraining = async (id:string) => {
   
 }
 
-export const updateMachine = async (id:string, serie:number, repet:number, weight:number, key:void) => {
+export const updateMachine = async (id:string, serie:number, repet:number, weight:number, key?:number) => {
   const machineRef:any = doc(db, 'machine', id);
   await updateDoc(machineRef, { serie, repet: repet, weight: weight, key })
   

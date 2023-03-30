@@ -75,7 +75,7 @@ const TrainingsDetails = () => {
     getTrainings().then((item: any) => {
       let trainings = item
       trainings.map((training, index) => {
-        getMachineTraining(training.name).then(item => {
+        getMachineTraining(training.name).then((item: any) => {
           let orderListItems = item.sort(function (a, b) {
             return a.key - b.key
           })
