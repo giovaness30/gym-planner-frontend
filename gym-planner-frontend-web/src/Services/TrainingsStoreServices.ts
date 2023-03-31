@@ -11,10 +11,17 @@ export const getTrainings = async () => {
   let auth:any = getUidAuth()
 
   let data:any = await getDocs(userCollectionRef('trainings'))
-  data = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
-  console.log(data);
+  console.log(data)
   
-  return(data.filter((x)=> x.uid == auth))
+  data = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+  data.filter((x)=> x.uid == auth)
+  let itensResponse = {
+    items: data,
+    empty: data.length > 0 ? false : true
+
+  }
+  
+  return(itensResponse)
 }
 
 export const getMachineTraining = async (training:string) => {

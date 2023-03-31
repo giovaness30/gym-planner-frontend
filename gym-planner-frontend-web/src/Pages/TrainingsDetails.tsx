@@ -36,13 +36,13 @@ const TrainingsDetails = () => {
   const [editRepValue, setEditRepValue]: any = useState(null)
   const [editSerieValue, setEditSerieValue]: any = useState(null)
   const [editWeightValue, setEditWeightValue]: any = useState(null)
-
+  const [isEmptyList, setIsEmptyList]: any = useState(false)
+  const [collapseTrainingActive, setCollapseTrainingActive]: any = useState([])
   const [openModalEdit, setOpenModalEdit]: any = useState({
     id: '',
     title: '',
     status: false
   })
-
   const [exerciseModal, setExerciseModal] = useState({
     open: false,
     name: '',
@@ -56,24 +56,30 @@ const TrainingsDetails = () => {
   }, [])
 
   const LoadingSkeleton = ({ children }) => {
-    if (trainings.length == 0)
+    if (trainings.length == 0 && !isEmptyList) {
       return (
-        <>
-          <div className="m-4">
-            {/* <Skeleton active /> */}
-            <p>Nenhum Treino encontrado...</p>
-            {/* //{' '} */}
-          </div>
-        </>
+        <div className="m-4">
+          <Skeleton active />
+        </div>
       )
-    else {
-      return children
     }
+    if (trainings.length == 0 && isEmptyList) {
+      return (
+        <div className="m-4 text-black">
+          <p>Nenhum Treino encontrado...</p>
+        </div>
+      )
+    }
+
+    return children
   }
 
   const getInitial = () => {
     getTrainings().then((item: any) => {
-      let trainings = item
+      setIsEmptyList(item.empty)
+
+      let trainings = item.items
+
       trainings.map((training, index) => {
         getMachineTraining(training.name).then((item: any) => {
           let orderListItems = item.sort(function (a, b) {
@@ -82,7 +88,6 @@ const TrainingsDetails = () => {
 
           trainings[index].machines = orderListItems
           const newValue = trainings
-          // console.log(newValue)
 
           setTrainings([...newValue])
         })
@@ -179,8 +184,6 @@ const TrainingsDetails = () => {
 
   //beautiful drag and drop
   const onDragEnd = useCallback(result => {
-    console.log(result)
-
     const { destination, source, draggableId } = result
 
     if (!destination) {
@@ -194,13 +197,13 @@ const TrainingsDetails = () => {
     }
 
     setTrainings(current => {
+      const panelId = current.findIndex(x => x.name == destination.droppableId)
       const newList = Array.from(current[0].machines)
-      const moveItem = current[0].machines[source.index]
+      const moveItem = current[panelId].machines[source.index]
       newList.splice(source.index, 1)
       newList.splice(destination.index, 0, moveItem)
-      console.log(current)
 
-      current[0].machines = newList.map((item: any, index) => {
+      current[panelId].machines = newList.map((item: any, index) => {
         updateMachine(item.id, item.serie, item.repet, item.weight, index)
         return {
           uid: item.uid,
@@ -219,11 +222,10 @@ const TrainingsDetails = () => {
 
   return (
     <Fragment>
-      {/* <p>Adicionar novo Treino</p> */}
       <Input.Group compact>
         <Input
-          style={{ width: 'calc(100% - 200px)' }}
-          placeholder="Adicionar Novo treino..."
+          className="max-w-[60%]"
+          placeholder="Nome do novo treino"
           value={inputNewTrainingValue}
           onChange={(e: any) => setInputNewTrainingValue(e.target.value)}
         />
@@ -232,16 +234,18 @@ const TrainingsDetails = () => {
           onClick={() => handleCreateTraining()}
           type="primary"
         >
-          Criar
+          Adicionar
         </Button>
       </Input.Group>
       <Divider></Divider>
       <LoadingSkeleton>
         {trainings?.length > 0 && (
-          <Collapse className="mx-2 m-auto" defaultActiveKey={trainings[0].id}>
+          <Collapse
+            className="mx-2 m-auto"
+            onChange={e => setCollapseTrainingActive(e)}
+            activeKey={collapseTrainingActive}
+          >
             {trainings?.map((training: any, indexTraining: string) => {
-              // console.log(training.machines)
-
               return (
                 <Panel
                   header={training.name}
@@ -257,32 +261,23 @@ const TrainingsDetails = () => {
                   }
                 >
                   <DragDropContext onDragEnd={onDragEnd}>
-                    <Droppable droppableId="id" type="PERSON">
-                      {(provided, snapshot) => {
+                    <Droppable droppableId={training.name} type="training">
+                      {provided => {
                         return (
                           <div
                             ref={provided.innerRef}
                             {...provided.droppableProps}
-                            // className={cx(
-                            //   styles.dropper,
-                            //   snapshot.isDraggingOver && styles.dropOver
-                            // )}
-                            style={{ color: ' #000' }}
+                            className="text-black"
                           >
                             <Row className="py-1 justify-center w-full border bg-slate-100 rounded-t">
-                              {/* <Col span={1}></Col> */}
                               <Col span={11}>Exercicio</Col>
                               <Col span={3}>Ser.</Col>
                               <Col span={5}>Rep.</Col>
                               <Col span={4}>Carga</Col>
-                              <Col className="" span={1}></Col>
-                              {/* <Col span={1}></Col>
-                              <Col span={1}></Col> */}
+                              <Col span={1}></Col>
                             </Row>
                             {training?.machines?.map(
                               (machine, indexMachines) => {
-                                // console.log(machine)
-
                                 return (
                                   <Draggable
                                     key={machine.key}
@@ -292,11 +287,6 @@ const TrainingsDetails = () => {
                                     {(provided, snapshot) => {
                                       return (
                                         <div
-                                          // className={cx(
-                                          //   styles.dragger,
-                                          //   snapshot.isDragging && styles.dragging
-                                          // )}
-                                          // className={snapshot.isDragging}
                                           style={{ color: '#000' }}
                                           ref={provided.innerRef}
                                           {...provided.draggableProps}
@@ -406,6 +396,7 @@ const TrainingsDetails = () => {
             <Col>
               <Input
                 className="w-[110px]"
+                type="number"
                 value={editWeightValue}
                 onChange={e => setEditWeightValue(e.target.value)}
                 addonAfter=".Kg"
@@ -432,8 +423,9 @@ const TrainingsDetails = () => {
               </Button>
             </Tooltip>
           </div>
-          <div className="w-2/3 flex justify-evenly">
+          <div className="w-2/3 flex justify-end">
             <Button
+              className="mr-3"
               onClick={() => setOpenModalEdit({ title: '', status: false })}
             >
               Cancelar
@@ -453,22 +445,18 @@ const TrainingsDetails = () => {
       <Modal
         title="Novo Exercicio"
         open={exerciseModal.open}
-        onOk={() =>
-          // console.log(
-          //   trainings.find(x => x.name == exerciseModal.trainingName).machines
-          //     .length
-          // )
-
-          handleCreateMachineTraining(
-            exerciseModal.name,
-            exerciseModal.trainingName,
-            exerciseModal.indexTraining,
-            trainings.find(x => x.name == exerciseModal.trainingName).machines
-              .length
-          )
-        }
-        okText="Adicionar"
-        okType="default"
+        footer={false}
+        // onOk={() =>
+        //   handleCreateMachineTraining(
+        //     exerciseModal.name,
+        //     exerciseModal.trainingName,
+        //     exerciseModal.indexTraining,
+        //     trainings.find(x => x.name == exerciseModal.trainingName).machines
+        //       .length
+        //   )
+        // }
+        // okText="Adicionar"
+        // okType="default"
         onCancel={() =>
           setExerciseModal({ ...exerciseModal, open: false, name: '' })
         }
@@ -481,6 +469,29 @@ const TrainingsDetails = () => {
             setExerciseModal({ ...exerciseModal, name: e.target.value })
           }
         />
+        <div className="flex justify-end">
+          <Button
+            onClick={() =>
+              setExerciseModal({ ...exerciseModal, open: false, name: '' })
+            }
+            className="mr-5"
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={() =>
+              handleCreateMachineTraining(
+                exerciseModal.name,
+                exerciseModal.trainingName,
+                exerciseModal.indexTraining,
+                trainings.find(x => x.name == exerciseModal.trainingName)
+                  .machines.length
+              )
+            }
+          >
+            Salvar
+          </Button>
+        </div>
       </Modal>
     </Fragment>
   )
