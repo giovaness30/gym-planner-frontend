@@ -77,8 +77,22 @@ export const deleteMachineTraining = async (id:string) => {
   
 }
 
-export const updateMachine = async (id:string, serie:number, repet:number, weight:number, key?:number) => {
+export const updateMachine = async (id:string, serie?:any, repet?:any, weight?:number, key?:number) => {
+  
   const machineRef:any = doc(db, 'machine', id);
-  await updateDoc(machineRef, { serie, repet: repet, weight: weight, key })
+
+  let bodyUpdate:any= {}
+
+  if(serie)
+    bodyUpdate.serie = serie
+  if(repet)
+    bodyUpdate.repet = repet
+  if(weight)
+    bodyUpdate.weight = weight
+  if(key)
+    bodyUpdate.key = key
+
+
+  await updateDoc(machineRef, bodyUpdate)
   
 }
